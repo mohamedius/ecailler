@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'Écailler | Système de Gestion Intégral</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @media print { .no-print { display: none; } }
+        .active-tab { background-color: #f97316; color: white !important; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .sidebar-item:hover:not(.active-tab) { background-color: #fff7ed; color: #f97316; }
+    </style>
+</head>
+<body class="bg-slate-50 flex h-screen overflow-hidden font-sans">
+
+    <aside class="w-72 bg-white border-r border-slate-200 flex flex-col no-print overflow-y-auto">
+        <div class="p-6 text-center border-b border-slate-100">
+            <img src="logo_ecailler.jpg" alt="Logo L'Écailler" class="mx-auto h-20 mb-2 object-contain">
+            <h1 class="text-sm font-black text-slate-800 tracking-widest uppercase">L'Écailler Faya</h1>
+        </div>
+
+        <nav class="flex-1 px-4 py-4 space-y-6">
+            <div>
+                <h2 class="text-[10px] font-black text-slate-400 uppercase mb-2 px-2 tracking-widest">Commandes</h2>
+                <div class="space-y-1">
+                    <button onclick="switchTab('pos')" id="nav-pos" class="nav-btn active-tab flex items-center w-full px-4 py-2.5 rounded-xl transition-all font-bold">
+                        <i class="fa-solid fa-cash-register w-6"></i><span>POS</span>
+                    </button>
+                    <button onclick="switchTab('commandes')" id="nav-commandes" class="nav-btn flex items-center w-full px-4 py-2.5 text-slate-600 rounded-xl transition-all font-bold sidebar-item">
+                        <i class="fa-solid fa-shopping-cart w-6"></i><span>Commandes</span>
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-[10px] font-black text-slate-400 uppercase mb-2 px-2 tracking-widest">Application</h2>
+                <div class="space-y-1">
+                    <button onclick="switchTab('clients')" id="nav-clients" class="nav-btn flex items-center w-full px-4 py-2.5 text-slate-600 rounded-xl transition-all font-bold sidebar-item">
+                        <i class="fa-solid fa-users w-6"></i><span>Clients</span>
+                    </button>
+                    <button onclick="switchTab('services')" id="nav-services" class="nav-btn flex items-center w-full px-4 py-2.5 text-slate-600 rounded-xl transition-all font-bold sidebar-item">
+                        <i class="fa-solid fa-hand-holding-heart w-6"></i><span>Services</span>
+                    </button>
+                    <button onclick="switchTab('depenses')" id="nav-depenses" class="nav-btn flex items-center w-full px-4 py-2.5 text-slate-600 rounded-xl transition-all font-bold sidebar-item">
+                        <i class="fa-solid fa-wallet w-6"></i><span>Dépenses</span>
+                    </button>
+                    <button onclick="switchTab('inventaire')" id="nav-inventaire" class="nav-btn flex items-center w-full px-4 py-2.5 text-slate-600 rounded-xl transition-all font-bold sidebar-item">
+                        <i class="fa-solid fa-boxes-stacked w-6"></i><span>Inventaire</span>
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-[10px] font-black text-slate-400 uppercase mb-2 px-2 tracking-widest">Analyse</h2>
+                <button onclick="switchTab('rapports')" id="nav-rapports" class="nav-btn flex items-center w-full px-4 py-2.5 text-slate-600 rounded-xl transition-all font-bold sidebar-item">
+                    <i class="fa-solid fa-chart-line w-6"></i><span>Rapports</span>
+                </button>
+            </div>
+        </nav>
+
+        <div class="p-4 border-t border-slate-100">
+            <button class="flex items-center w-full px-4 py-3 text-red-500 bg-red-50 rounded-xl font-bold hover:bg-red-100 transition-all">
+                <i class="fa-solid fa-power-off w-6"></i><span>Déconnexion</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-10 no-print">
+            <h2 id="header-title" class="text-sm font-black text-slate-800 uppercase tracking-widest">Point de Vente</h2>
+            <div id="live-clock" class="text-slate-400 font-mono font-bold text-sm bg-slate-50 px-4 py-1 rounded-full border border-slate-100">--:--:--</div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8">
+            
+            <div id="tab-pos" class="tab-content active">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="bg-slate-900 rounded-[3rem] p-10 text-white text-center shadow-2xl relative overflow-hidden">
+                            <div class="text-[8rem] font-mono font-black text-orange-500 leading-none mb-4"><span id="poids-num">0.000</span></div>
+                            <span class="text-slate-500 font-bold uppercase tracking-widest">Kilogrammes (KG)</span>
+                            <div class="flex justify-center space-x-3 mt-10">
+                                <button onclick="addW(0.5)" class="bg-slate-800 hover:bg-slate-700 px-8 py-4 rounded-2xl font-black text-xl transition-all">+ 0.5</button>
+                                <button onclick="addW(1)" class="bg-slate-800 hover:bg-slate-700 px-8 py-4 rounded-2xl font-black text-xl transition-all">+ 1.0</button>
+                                <button onclick="resetW()" class="bg-red-600/20 text-red-500 px-8 py-4 rounded-2xl font-black text-xl transition-all">TARE</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <button onclick="setProd('Capitaine', 7500)" class="bg-white p-6 rounded-3xl border-2 border-transparent hover:border-orange-500 shadow-sm text-left transition-all">
+                                <h4 class="font-black text-slate-800">Capitaine</h4><p class="text-orange-500 font-bold">7.500 F/kg</p>
+                            </button>
+                            <button onclick="setProd('Mérou', 9500)" class="bg-white p-6 rounded-3xl border-2 border-transparent hover:border-orange-500 shadow-sm text-left transition-all">
+                                <h4 class="font-black text-slate-800">Mérou Rouge</h4><p class="text-orange-500 font-bold">9.500 F/kg</p>
+                            </button>
+                            <button onclick="setProd('Gambas', 12000)" class="bg-white p-6 rounded-3xl border-2 border-transparent hover:border-orange-500 shadow-sm text-left transition-all">
+                                <h4 class="font-black text-slate-800">Gambas G3</h4><p class="text-orange-500 font-bold">12.000 F/kg</p>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-[3rem] shadow-xl flex flex-col justify-between border border-slate-100">
+                        <div>
+                            <h3 class="font-black text-xl text-slate-800 mb-8 flex items-center"><i class="fa-solid fa-receipt mr-3 text-orange-500"></i>Ticket Actuel</h3>
+                            <div class="space-y-6">
+                                <div class="flex justify-between border-b pb-2"><span class="text-slate-400 font-bold">Poisson:</span><span id="cart-item" class="font-black text-slate-800">-</span></div>
+                                <div class="flex justify-between border-b pb-2"><span class="text-slate-400 font-bold">Poids Net:</span><span id="cart-kg" class="font-black text-slate-800">0.000 kg</span></div>
+                            </div>
+                        </div>
+                        <div class="mt-10">
+                            <div class="flex justify-between items-end mb-8"><span class="text-slate-400 font-bold text-xs">TOTAL À PAYER</span><span id="cart-total" class="text-4xl font-black text-slate-900 leading-none">0 F</span></div>
+                            <button onclick="saveSale()" class="w-full bg-orange-500 text-white py-6 rounded-[2rem] font-black text-lg shadow-xl shadow-orange-100 hover:bg-orange-600 transition-all active:scale-95">VALIDER LA VENTE</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-clients" class="tab-content">
+                <div class="max-w-4xl bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100">
+                    <h3 class="text-2xl font-black text-slate-800 mb-8">Base Clients</h3>
+                    <div class="grid grid-cols-2 gap-4 mb-10">
+                        <input id="c-name" type="text" placeholder="Nom du client" class="p-5 bg-slate-50 rounded-2xl border-none font-bold">
+                        <input id="c-phone" type="text" placeholder="Téléphone" class="p-5 bg-slate-50 rounded-2xl border-none font-bold">
+                        <button onclick="addClient()" class="col-span-2 bg-slate-800 text-white py-5 rounded-2xl font-black hover:bg-slate-900">Ajouter au Répertoire</button>
+                    </div>
+                    <div class="overflow-hidden rounded-2xl border border-slate-100">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-slate-400 text-xs font-black uppercase tracking-widest">
+                                <tr><th class="p-4">Nom</th><th class="p-4 text-right">Contact</th></tr>
+                            </thead>
+                            <tbody id="client-list" class="divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-depenses" class="tab-content">
+                <div class="max-w-2xl bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100">
+                    <h3 class="text-2xl font-black text-red-600 mb-8">Sorties de Caisse</h3>
+                    <div class="space-y-4 mb-10">
+                        <input id="d-motif" type="text" placeholder="Motif (ex: Achat Glace, Electricité)" class="w-full p-5 bg-slate-50 rounded-2xl border-none font-bold">
+                        <input id="d-montant" type="number" placeholder="Montant (FCFA)" class="w-full p-5 bg-slate-50 rounded-2xl border-none font-bold">
+                        <button onclick="addDepense()" class="w-full bg-red-600 text-white py-5 rounded-2xl font-black hover:bg-red-700">Enregistrer la Dépense</button>
+                    </div>
+                    <div id="depense-list" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <div id="tab-commandes" class="tab-content">
+                <div class="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
+                    <h3 class="text-2xl font-black text-slate-800 mb-8">Historique des Ventes</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="text-slate-400 text-xs font-black uppercase tracking-widest border-b h-12">
+                                <tr><th>Date & Heure</th><th>Produit</th><th class="text-right">Poids</th><th class="text-right">Total</th></tr>
+                            </thead>
+                            <tbody id="sales-history" class="text-slate-700 font-bold divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-inventaire" class="tab-content text-center py-20">
+                <i class="fa-solid fa-boxes-packing text-6xl text-slate-200 mb-6"></i>
+                <h3 class="text-xl font-black text-slate-400">Gestion de Stock bientôt disponible</h3>
+            </div>
+
+            <div id="tab-rapports" class="tab-content text-center py-20">
+                <i class="fa-solid fa-chart-pie text-6xl text-slate-200 mb-6"></i>
+                <h3 class="text-xl font-black text-slate-400">Analyses et Graphiques en cours</h3>
+            </div>
+
+            <div id="tab-services" class="tab-content text-center py-20">
+                <i class="fa-solid fa-concierge-bell text-6xl text-slate-200 mb-6"></i>
+                <h3 class="text-xl font-black text-slate-400">Services Additionnels</h3>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        let weight = 0, price = 0, item = "";
+        let clients = JSON.parse(localStorage.getItem('clients')) || [];
+        let sales = JSON.parse(localStorage.getItem('sales')) || [];
+        let depenses = JSON.parse(localStorage.getItem('depenses')) || [];
+
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-tab'));
+            document.getElementById('tab-' + id).classList.add('active');
+            document.getElementById('nav-' + id).classList.add('active-tab');
+            
+            const titles = { pos: 'Point de Vente', clients: 'Base Clients', depenses: 'Dépenses', commandes: 'Historique Ventes', inventaire: 'Stocks', rapports: 'Analyses', services: 'Services' };
+            document.getElementById('header-title').innerText = titles[id];
+
+            if(id === 'clients') renderClients();
+            if(id === 'commandes') renderSales();
+            if(id === 'depenses') renderDepenses();
+        }
+
+        // POS LOGIC
+        function addW(v) { weight += v; update(); }
+        function resetW() { weight = 0; update(); }
+        function setProd(n, p) { item = n; price = p; update(); }
+        function update() {
+            document.getElementById('poids-num').innerText = weight.toFixed(3);
+            document.getElementById('cart-kg').innerText = weight.toFixed(3) + " kg";
+            document.getElementById('cart-item').innerText = item || "-";
+            document.getElementById('cart-total').innerText = (weight * price).toLocaleString() + " F";
+        }
+
+        function saveSale() {
+            if(weight <= 0 || !item) return alert("Veuillez peser un produit.");
+            let s = { d: new Date().toLocaleString('fr-FR'), i: item, w: weight.toFixed(3), t: (weight * price) };
+            sales.push(s);
+            localStorage.setItem('sales', JSON.stringify(sales));
+            alert("Vente validée !");
+            resetW();
+        }
+
+        // CLIENT LOGIC
+        function addClient() {
+            let n = document.getElementById('c-name').value, p = document.getElementById('c-phone').value;
+            if(!n || !p) return alert("Remplir les champs.");
+            clients.push({n, p});
+            localStorage.setItem('clients', JSON.stringify(clients));
+            document.getElementById('c-name').value = ''; document.getElementById('c-phone').value = '';
+            renderClients();
+        }
+        function renderClients() {
+            document.getElementById('client-list').innerHTML = clients.map(c => `<tr class="h-14 font-bold text-slate-800"><td class="p-4">${c.n}</td><td class="p-4 text-right text-orange-500">${c.p}</td></tr>`).join('');
+        }
+
+        // DEPENSE LOGIC
+        function addDepense() {
+            let m = document.getElementById('d-motif').value, a = document.getElementById('d-montant').value;
+            if(!m || !a) return alert("Veuillez remplir les champs");
+            depenses.push({m, a: parseInt(a), d: new Date().toLocaleDateString()});
+            localStorage.setItem('depenses', JSON.stringify(depenses));
+            document.getElementById('d-motif').value = ''; document.getElementById('d-montant').value = '';
+            renderDepenses();
+        }
+        function renderDepenses() {
+            document.getElementById('depense-list').innerHTML = depenses.map(d => `<div class="flex justify-between bg-red-50 p-4 rounded-xl font-bold text-red-600"><span>${d.m} (${d.d})</span><span>- ${d.a.toLocaleString()} F</span></div>`).join('');
+        }
+
+        // SALES LOGIC
+        function renderSales() {
+            document.getElementById('sales-history').innerHTML = sales.reverse().map(s => `<tr class="h-14 border-b"><td>${s.d}</td><td>${s.i}</td><td class="text-right">${s.w} kg</td><td class="text-right text-orange-600">${s.t.toLocaleString()} F</td></tr>`).join('');
+        }
+
+        setInterval(() => { document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('fr-FR'); }, 1000);
+    </script>
+</body>
+</html>
